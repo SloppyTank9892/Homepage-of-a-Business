@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS.mirror - Smart Shopping</title>
+    <style>
+        :root {
+            --primary: #111;
+            --secondary: #FF9900;
+            --bg: #f5f5f5;
+            --text: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* Header with animated gradient */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #333 100%);
+            color: white;
+            padding: 1.5rem;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            filter: drop-shadow(0 0 5px rgba(255,153,0,0.5));
+        }
+
+        /* Minimalist AWS.mirror logo (SVG) */
+        .logo-circle {
+            fill: none;
+            stroke: var(--secondary);
+            stroke-width: 4;
+            stroke-dasharray: 150;
+            stroke-dashoffset: 150;
+            animation: draw 1.5s ease-out forwards;
+        }
+
+        .logo-line {
+            stroke: white;
+            stroke-width: 4;
+            stroke-linecap: round;
+            opacity: 0;
+            animation: fadeIn 0.5s 1s ease-out forwards;
+        }
+
+        /* Search bar with glow effect */
+        .search-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 5px 20px rgba(255,153,0,0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Product grid with staggered animation */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s forwards;
+        }
+
+        .product-card:nth-child(1) { animation-delay: 0.1s; }
+        .product-card:nth-child(2) { animation-delay: 0.2s; }
+        .product-card:nth-child(3) { animation-delay: 0.3s; }
+        .product-card:nth-child(4) { animation-delay: 0.4s; }
+        .product-card:nth-child(5) { animation-delay: 0.5s; }
+        .product-card:nth-child(6) { animation-delay: 0.6s; }
+        .product-card:nth-child(7) { animation-delay: 0.7s; }
+        .product-card:nth-child(8) { animation-delay: 0.8s; }
+        .product-card:nth-child(9) { animation-delay: 0.9s; }
+        .product-card:nth-child(10) { animation-delay: 1s; }
+
+        .product-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-category {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .product-name {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .product-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .product-price::before {
+            content: '$';
+            font-size: 0.9em;
+        }
+
+        .cart-add {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .cart-add:hover {
+            background: #e68a00;
+            transform: translateY(-2px);
+        }
+
+        .cart-add:active {
+            transform: translateY(0);
+        }
+
+        /* Floating cart button */
+        .cart-button {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .cart-button:hover {
+            transform: scale(1.1) rotate(10deg);
+            background: var(--secondary);
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: red;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        /* Animations */
+        @keyframes draw {
+            to { stroke-dashoffset: 0; }
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Loading skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #eee 25%, #f5f5f5 50%, #eee 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes shimmer {
+            to { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo-container">
+            <!-- Minimalist AWS.mirror logo (SVG) -->
+            <svg class="logo" viewBox="0 0 100 100">
+                <circle class="logo-circle" cx="50" cy="50" r="40" />
+                <line class="logo-line" x1="30" y1="50" x2="70" y2="50" />
+                <line class="logo-line" x1="50" y1="30" x2="50" y2="70" />
+            </svg>
+            <h1>AWS.mirror</h1>
+        </div>
+        <p>Smart shopping for the modern lifestyle</p>
+    </header>
+
+    <div class="search-container">
+        <input type="text" class="search-input" placeholder="Search for products...">
+    </div>
+
+    <main>
+        <section class="product-grid">
+            <!-- Electronics -->
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80" alt="Wireless Earbuds" class="product-image">
+                <div class="product-info">
+                    <span class="product-category">Electronics</span>
+                    <h3 class="product-name">Pro Wireless Earbuds</h3>
+                    <p class="product-price">129.99</p>
+                    <button class="cart-add">Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=400&q=80" alt="Smartwatch" class="product-image">
+                <div class="product-info">
+                    <span class="product-category">Electronics</span>
+                    <h3 class="product-name">Fitness Smartwatch</h3>
+                    <p class="product-price">199.99</p>
+                    <button class="cart-add">Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80" alt="Bluetooth Speaker" class="product-image">
+                <div class="product-info">
+                    <span class="product-category">Electronics</span>
+                    <h3 class="product-name">Portable Speaker</h3>
+                    <p class="product-price">79.99</p>
+                    <button class="cart-add">Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://images.pexels.com/photos/699122/pexels-photo-699122.jpeg?auto=compress&w=400&q=80" alt="Phone Case" class="product-image">
+                <div class="product-info">
+                    <span class="product-category">Accessories</span>
+                    <h3 class="product-name">Premium Phone Case</h3>
+                    <p class="product-price">29.99</p>
+                    <button class="cart-add">Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?auto=format&fit=crop&w=400&q=80" alt="Tablet" class="product-image">
+                <div class="product-info">
+                    <span class="product-category">Electronics</span>
+                    <h3 class="product-name">10" Tablet</h3>
+                    <p class="product-price">249.99</p>
+                    <button class="cart-add">Add to Cart</button>
+                </div>
+            </div>
+
+            <!-- Fashion -->
+            <div class="product-card">
+                <img src="https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&w=400&q=80" alt="Sneakers" class="product-image">
+                <div class="product-info">
+                    <span class="product-category">Fashion</span>
+                    <h3 class="product-name">Urban Sneakers</h3>
+                    <p class="product-price">89.99</p>
+                    <button class="cart-add">Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" alt="Backpack" class="product-image">
+                <div class="product-info">
+                    <span class="product-category">Fashion</span>
+                    <h3 class="product-name">Minimalist Backpack</h3>
+                    <p class="product-price">59.99</p>
+                    <button class="cart-add">Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1516574187841-cb9cc2ca948b?auto=format&fit=crop&w=400&q=80" alt="Watch" class="product-image">
+                <div class="product-info">
+                    <span class="product-category">Fashion</span>
+                    <h3 class="product-name">Classic Watch</h3>
+                    <p class="product-price">149.99</p>
+                    <button class="cart-add">Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=crop&w=400&q=80" alt="Sunglasses" class="product-image">
+                <div class="product-info">
+                    <span class="product-category">Accessories</span>
+                    <h3 class="product-name">Polarized Sunglasses</h3>
+                    <p class="product-price">39.99</p>
+                    <button class="cart-add">Add to Cart</button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=400&q=80" alt="Hoodie" class="product-image">
+                <div class="product-info">
+                    <span class="product-category">Fashion</span>
+                    <h3 class="product-name">Premium Hoodie</h3>
+                    <p class="product-price">49.99</p>
+                    <button class="cart-add">Add to Cart</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Floating cart button -->
+    <div class="cart-button">
+        🛒
+        <span class="cart-count">0</span>
+    </div>
+
+    <script>
+        // Cart functionality
+        let cartItems = 0;
+        const cartButton = document.querySelector('.cart-button');
+        const cartCount = document.querySelector('.cart-count');
+
+        document.querySelectorAll('.cart-add').forEach(button => {
+            button.addEventListener('click', (e) => {
+                // Animation
+                e.target.innerHTML = '✓ Added!';
+                e.target.style.backgroundColor = '#4CAF50';
+                
+                // Update cart
+                cartItems++;
+                cartCount.textContent = cartItems;
+                cartButton.style.transform = 'scale(1.2)';
+                
+                setTimeout(() => {
+                    e.target.innerHTML = 'Add to Cart';
+                    e.target.style.backgroundColor = '';
+                    cartButton.style.transform = '';
+                }, 1500);
+                
+                // Product details for demo
+                const productName = e.target.closest('.product-card').querySelector('.product-name').textContent;
+                console.log(`Added to cart: ${productName}`);
+            });
+        });
+
+        // Floating cart click
+        cartButton.addEventListener('click', () => {
+            alert(`You have ${cartItems} items in your cart`);
+        });
+
+        // Animate elements when they come into view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.product-card').forEach(card => {
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
